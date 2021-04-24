@@ -180,5 +180,4 @@ func (it *fsNodeList) del(path string) {
 	defer it.mu.Unlock()
 
 	delete(it.items, pathFilter(path))
-
 }

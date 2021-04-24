@@ -385,10 +385,6 @@ func (it *kvFsDir) Remove(ctx context.Context, req *fuse.RemoveRequest) error {
 		return nil
 	}
 
-	var (
-		batch = it.fs.tbl.NewBatch()
-	)
-
 	nodePre, err := it.fs.cache.get(it.path + "/" + req.Name)
 	if err != nil {
 		if err == fuse.ENOENT {
@@ -397,7 +393,24 @@ func (it *kvFsDir) Remove(ctx context.Context, req *fuse.RemoveRequest) error {
 		return err
 	}
 
-	//
+	var (
+		batch  = it.fs.tbl.NewBatch()
+		chkNum = uint32(nodePre.fsMeta.Size / kvFsChunkSize)
+	)
+
+	if a := nodePre.fsMeta.Size % kvFsChunkSize; a > 0 {
+		chkNum++
+	}
+
+	for i := uint32(0); i <= chkNum; i++ {
+		w := batch.Delete(pathDataChunkKey(nodePre.dbMeta.IncrId, i))
+		w.Meta.Attrs |= kv2.ObjectMetaAttrMetaOff
+	}
+
+	w := batch.Delete(nodePre.fsMeta.metaKey())
+	w.Meta.Attrs |= kv2.ObjectMetaAttrDataOff
+
+	/**
 	dk := nsKeyEncode(FileRemove, uint64ToBytes(nodePre.dbMeta.IncrId))
 
 	w := batch.Put(dk, nodePre.fsMeta, kvFsDataCodec)
@@ -407,11 +420,14 @@ func (it *kvFsDir) Remove(ctx context.Context, req *fuse.RemoveRequest) error {
 
 	w = batch.Delete(nodePre.fsMeta.metaKey())
 	w.Meta.Attrs |= kv2.ObjectMetaAttrDataOff
+	*/
 
 	rs := batch.Commit()
 	if !rs.OK() {
 		return errors.New(rs.Message)
 	}
+
+	it.fs.cache.del(it.path + "/" + req.Name)
 
 	return nil
 }

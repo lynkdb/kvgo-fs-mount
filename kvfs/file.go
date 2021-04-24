@@ -182,7 +182,7 @@ func (it *kvFsFile) Read(ctx context.Context,
 
 	resp.Data = []byte{} // make([]byte, req.Size)
 
-	for len(resp.Data) < req.Size {
+	for len(resp.Data) < req.Size && reqOffset < it.node.fsMeta.Size {
 
 		blkNum := uint32(reqOffset / kvFsChunkSize)
 
