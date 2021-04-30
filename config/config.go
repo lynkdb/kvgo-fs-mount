@@ -57,7 +57,7 @@ func Setup(ver, rel string) error {
 		Prefix = "/opt/lynkdb/" + AppName
 	}
 
-	confFile = Prefix + "/etc/kvgo-fs-mount.conf"
+	confFile = Prefix + "/etc/kvgo-fs-mount.toml"
 
 	err = htoml.DecodeFromFile(&Config, confFile)
 
