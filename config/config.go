@@ -39,7 +39,7 @@ type ConfigCommon struct {
 }
 
 var (
-	version  = "0.1.0"
+	version  = "0.1.1"
 	release  = "1"
 	AppName  = "kvgo-fs-mount"
 	Prefix   = ""

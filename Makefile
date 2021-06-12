@@ -6,7 +6,7 @@ APP_HOME = /opt/lynkdb/kvgo-fs-mount
 APP_USER = kvgo
 
 all:
-	go build -o ${EXE_SERVER} cmd/server/main.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ${EXE_SERVER} cmd/server/main.go
 
 install:
 	mkdir -p ${APP_HOME}/bin
